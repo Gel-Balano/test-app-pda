@@ -64,7 +64,8 @@ describe("test-app-pda", () => {
 
     const tx = await program.methods.depositEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
       owner: authority.publicKey,
-    }).rpc()
+      mint: tokenMint,
+    }).signers([authority]).rpc()
 
     console.log('tx: ', tx)
 
