@@ -5,7 +5,7 @@ import { Keypair, PublicKey } from "@solana/web3.js";
 import { readFileSync } from 'fs'
 import { homedir } from 'os'
 import { resolve } from 'path'
-import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
+import { createMint, getAccount, getAssociatedTokenAddress, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
 import { expect } from "chai";
 
 function loadKeypair(filePath: string): Keypair {
@@ -71,5 +71,31 @@ describe("test-app-pda", () => {
 
     const escrow = await program.account.escrow.fetch(escrowPda)
     expect(escrow.owner.equals(authority.publicKey)).to.be.true
+
+    const associatedTokenAccount = await getAssociatedTokenAddress(
+      tokenMint,
+      authority.publicKey
+    )
+
+    const tokenAccountInfo = await getAccount(
+      program.provider.connection,
+      associatedTokenAccount
+    )
+
+    const balance = tokenAccountInfo.amount
+    expect(Number(balance) / 10 ** 9).to.be.equal(995)
+
+    const escrowTokenAccount = await getAssociatedTokenAddress(
+      tokenMint,
+      escrowPda
+    )
+
+    const escrowTokenAccountInfo = await getAccount(
+      program.provider.connection,
+      escrowTokenAccount
+    )
+
+    const escrowBalance = escrowTokenAccountInfo.amount
+    expect(Number(escrowBalance) / 10 ** 9).to.be.equal(5)
   });
 });
