@@ -6,6 +6,7 @@ import { readFileSync } from 'fs'
 import { homedir } from 'os'
 import { resolve } from 'path'
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
+import { expect } from "chai";
 
 function loadKeypair(filePath: string): Keypair {
   const resolvedPath = filePath.startsWith('~')
@@ -57,6 +58,14 @@ describe("test-app-pda", () => {
 
   it("Is initialized!", async () => {
     // Add your test here.
+    const [escrowPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("escrow"), authority.publicKey.toBuffer()],
+      program.programId);
 
+    const ix = program.methods.depositEscrow({amount: new BN(1000 * 10 ** 9)}).rpc();
+    console.log('wat', ix)
+
+    const escrow = await program.account.escrow.fetch(escrowPda)
+    expect(escrow.owner.equals(authority.publicKey)).to.be.true
   });
 });
