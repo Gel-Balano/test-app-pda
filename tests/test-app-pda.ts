@@ -85,17 +85,17 @@ describe("test-app-pda", () => {
     const balance = tokenAccountInfo.amount
     expect(Number(balance) / 10 ** 9).to.be.equal(995)
 
-    const escrowTokenAccount = await getAssociatedTokenAddress(
+    const escrowAccount = await getAssociatedTokenAddress(
       tokenMint,
       escrowPda
     )
 
-    const escrowTokenAccountInfo = await getAccount(
+    const escrowAccountInfo = await getAccount(
       program.provider.connection,
-      escrowTokenAccount
+      escrowAccount
     )
 
-    const escrowBalance = escrowTokenAccountInfo.amount
+    const escrowBalance = escrowAccountInfo.amount
     expect(Number(escrowBalance) / 10 ** 9).to.be.equal(5)
-  });
-});
+  })
+})
