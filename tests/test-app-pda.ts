@@ -87,7 +87,8 @@ describe("test-app-pda", () => {
 
     const escrowAccount = await getAssociatedTokenAddress(
       tokenMint,
-      escrowPda
+      escrowPda,
+      true
     )
 
     const escrowAccountInfo = await getAccount(
