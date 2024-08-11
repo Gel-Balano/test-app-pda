@@ -60,10 +60,13 @@ describe("test-app-pda", () => {
     // Add your test here.
     const [escrowPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("escrow"), authority.publicKey.toBuffer()],
-      program.programId);
+      program.programId)
 
-    const ix = program.methods.depositEscrow({amount: new BN(1000 * 10 ** 9)}).rpc();
-    console.log('wat', ix)
+    const tx = await program.methods.depositEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
+      owner: authority.publicKey,
+    }).rpc()
+
+    console.log('tx: ', tx)
 
     const escrow = await program.account.escrow.fetch(escrowPda)
     expect(escrow.owner.equals(authority.publicKey)).to.be.true
