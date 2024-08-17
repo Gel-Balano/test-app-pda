@@ -28,38 +28,34 @@ pub mod test_app_pda {
         Ok(())
     }
 
-//     pub fn withdraw_from_escrow(ctx: Context<WithdrawFromEscrow>) -> Result<()> {
-//         let escrow = &ctx.accounts.escrow;
+    pub fn withdraw_escrow(ctx: Context<WithdrawEscrow>, params: InitializeEscrowParams) -> Result<()> {
+      let escrow = &mut ctx.accounts.escrow;
 
-//         // Ensure the withdrawer is the initializer
-//         require!(
-//             escrow.initializer == ctx.accounts.withdrawer.key(),
-//             EscrowError::UnauthorizedWithdrawal
-//         );
+      // Check if the signer is the owner of the escrow
+      require!(
+        escrow.owner == ctx.accounts.owner.key(),
+        EscrowError::UnauthorizedWithdrawal
+      );
 
-//         // Transfer tokens from escrow account back to initializer
-//         token::transfer(
-//             CpiContext::new_with_signer(
-//                 ctx.accounts.token_program.to_account_info(),
-//                 Transfer {
-//                     from: ctx.accounts.escrow_token_account.to_account_info(),
-//                     to: ctx.accounts.withdrawer_token_account.to_account_info(),
-//                     authority: ctx.accounts.escrow_token_account.to_account_info(),
-//                 },
-//                 &[&[
-//                     b"escrow",
-//                     ctx.accounts.escrow.to_account_info().key.as_ref(),
-//                     &[*ctx.bumps.get("escrow_token_account").unwrap()],
-//                 ]]
-//             ),
-//             escrow.amount,
-//         )?;
+      // Transfer tokens from escrow account back to owner
+      token::transfer(
+          CpiContext::new_with_signer(
+              ctx.accounts.token_program.to_account_info(),
+              Transfer {
+                  from: ctx.accounts.escrow_token_account.to_account_info(),
+                  to: ctx.accounts.owner_token_account.to_account_info(),
+                  authority: ctx.accounts.owner.to_account_info(),
+              },
+              &[&[b"escrow", escrow.owner.as_ref(), &[escrow.bump]]],
+          ),
+          params.amount,
+      )?;
 
-//         // Close the escrow account
-//         ctx.accounts.escrow.close(ctx.accounts.withdrawer.to_account_info())?;
+      // Close the escrow account
+      ctx.accounts.escrow.close(ctx.accounts.owner.to_account_info())?;
 
-//         Ok(())
-//     }
+      Ok(())
+    }
 }
 
 #[derive(AnchorDeserialize, AnchorSerialize)]
@@ -105,24 +101,32 @@ pub struct InitializeEscrow<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-// #[derive(Accounts)]
-// pub struct WithdrawFromEscrow<'info> {
-//     #[account(mut)]
-//     pub withdrawer: Signer<'info>,
-//     #[account(mut)]
-//     pub withdrawer_token_account: Account<'info, TokenAccount>,
-//     #[account(
-//         mut,
-//         seeds = [b"escrow", escrow.key().as_ref()],
-//         bump,
-//         token::mint = withdrawer_token_account.mint,
-//         token::authority = escrow_token_account,
-//     )]
-//     pub escrow_token_account: Account<'info, TokenAccount>,
-//     #[account(mut, has_one = owner)]
-//     pub escrow: Account<'info, Escrow>,
-//     pub token_program: Program<'info, Token>,
-// }
+#[derive(Accounts)]
+#[instruction(params: InitializeEscrowParams)]
+pub struct WithdrawEscrow<'info> {
+    #[account(
+      init_if_needed,
+      payer = owner,
+      seeds=[b"escrow", owner.key().as_ref()],
+      bump,
+      space = 8 + 8 + 32
+    )]
+    pub escrow: Account<'info, Escrow>,
+
+    #[account(mut)]
+    pub owner: Signer<'info>,
+
+    #[account(mut)]
+    pub owner_token_account: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub escrow_token_account: Account<'info, TokenAccount>,
+
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
+}
 
 #[account]
 pub struct Escrow {
