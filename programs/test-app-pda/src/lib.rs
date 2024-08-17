@@ -108,10 +108,19 @@ pub struct WithdrawEscrow<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
 
-    #[account(mut)]
+    #[account(
+      mut,
+      associated_token::mint = mint,
+      associated_token::authority = owner,
+    )]
     pub owner_token_account: Account<'info, TokenAccount>,
 
-    #[account(mut)]
+    #[account(
+      mut,
+      associated_token::mint = mint,
+      associated_token::authority = escrow,
+      constraint = escrow_token_account.amount >= params.amount,
+    )]
     pub escrow_token_account: Account<'info, TokenAccount>,
 
     pub mint: Account<'info, Mint>,
