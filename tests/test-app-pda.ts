@@ -102,6 +102,8 @@ describe("test-app-pda", () => {
     const withdraw_tx = await program.methods.withdrawEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
       owner: authority.publicKey,
       mint: tokenMint,
+      ownerTokenAccount: ownerAta,
+      escrowTokenAccount: escrowAccount,
     }).signers([authority]).rpc()
   })
 })
