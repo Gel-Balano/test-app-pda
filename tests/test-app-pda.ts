@@ -26,6 +26,12 @@ describe("test-app-pda", () => {
 
   let tokenMint: PublicKey
   let ownerAta: PublicKey
+  let associatedTokenAccount: PublicKey
+  let escrowAccount: PublicKey
+
+  const [escrowPda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("escrow"), authority.publicKey.toBuffer()],
+    program.programId)
 
   before(async () => {
     tokenMint = await createMint(
@@ -45,6 +51,17 @@ describe("test-app-pda", () => {
       )
     ).address
 
+    associatedTokenAccount = await getAssociatedTokenAddress(
+      tokenMint,
+      authority.publicKey
+    )
+
+    escrowAccount = await getAssociatedTokenAddress(
+      tokenMint,
+      escrowPda,
+      true
+    )
+
     await Promise.all([
       mintTo(
         program.provider.connection,
@@ -56,26 +73,15 @@ describe("test-app-pda", () => {
       )])
   })
 
-  it("can deposit and withdraw escrow!", async () => {
+  it("can deposit to escrow.", async () => {
     // Add your test here.
-    const [escrowPda] = PublicKey.findProgramAddressSync(
-      [Buffer.from("escrow"), authority.publicKey.toBuffer()],
-      program.programId)
-
-    const deposit_tx = await program.methods.depositEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
+    await program.methods.depositEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
       owner: authority.publicKey,
       mint: tokenMint,
     }).signers([authority]).rpc()
 
-    console.log('tx: ', deposit_tx)
-
     const escrow = await program.account.escrow.fetch(escrowPda)
     expect(escrow.owner.equals(authority.publicKey)).to.be.true
-
-    const associatedTokenAccount = await getAssociatedTokenAddress(
-      tokenMint,
-      authority.publicKey
-    )
 
     const tokenAccountInfo = await getAccount(
       program.provider.connection,
@@ -85,12 +91,6 @@ describe("test-app-pda", () => {
     const balance = tokenAccountInfo.amount
     expect(Number(balance) / 10 ** 9).to.be.equal(995)
 
-    const escrowAccount = await getAssociatedTokenAddress(
-      tokenMint,
-      escrowPda,
-      true
-    )
-
     const escrowAccountInfo = await getAccount(
       program.provider.connection,
       escrowAccount
@@ -98,12 +98,14 @@ describe("test-app-pda", () => {
 
     const escrowBalance = escrowAccountInfo.amount
     expect(Number(escrowBalance) / 10 ** 9).to.be.equal(5)
+  })
 
-    const withdraw_tx = await program.methods.withdrawEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
+  it("can withdraw from escrow.", async () => {
+    // Add your test here.
+    await program.methods.withdrawEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
       owner: authority.publicKey,
-      mint: tokenMint,
-      ownerTokenAccount: ownerAta,
-      escrowTokenAccount: escrowAccount,
+      ownerTokenAccount: associatedTokenAccount,
+      escrowTokenAccount: escrowAccount
     }).signers([authority]).rpc()
   })
 })
