@@ -45,9 +45,6 @@ pub mod test_app_pda {
           params.amount,
       )?;
 
-      // Close the escrow account
-      ctx.accounts.escrow.close(ctx.accounts.owner.to_account_info())?;
-
       Ok(())
     }
 }
