@@ -56,18 +56,18 @@ describe("test-app-pda", () => {
       )])
   })
 
-  it("Is initialized!", async () => {
+  it("can deposit and withdraw escrow!", async () => {
     // Add your test here.
     const [escrowPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("escrow"), authority.publicKey.toBuffer()],
       program.programId)
 
-    const tx = await program.methods.depositEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
+    const deposit_tx = await program.methods.depositEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
       owner: authority.publicKey,
       mint: tokenMint,
     }).signers([authority]).rpc()
 
-    console.log('tx: ', tx)
+    console.log('tx: ', deposit_tx)
 
     const escrow = await program.account.escrow.fetch(escrowPda)
     expect(escrow.owner.equals(authority.publicKey)).to.be.true
@@ -98,5 +98,10 @@ describe("test-app-pda", () => {
 
     const escrowBalance = escrowAccountInfo.amount
     expect(Number(escrowBalance) / 10 ** 9).to.be.equal(5)
+
+    const withdraw_tx = await program.methods.withdrawEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
+      owner: authority.publicKey,
+      mint: tokenMint,
+    }).signers([authority]).rpc()
   })
 })
