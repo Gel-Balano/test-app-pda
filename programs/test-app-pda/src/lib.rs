@@ -122,6 +122,7 @@ pub struct WithdrawEscrow<'info> {
     #[account(mut)]
     pub escrow_token_account: Account<'info, TokenAccount>,
 
+    pub mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
