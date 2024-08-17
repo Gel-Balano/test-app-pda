@@ -31,12 +31,6 @@ pub mod test_app_pda {
     pub fn withdraw_escrow(ctx: Context<WithdrawEscrow>, params: InitializeEscrowParams) -> Result<()> {
       let escrow = &mut ctx.accounts.escrow;
 
-      // Check if the signer is the owner of the escrow
-      require!(
-        escrow.owner == ctx.accounts.owner.key(),
-        EscrowError::UnauthorizedWithdrawal
-      );
-
       // Transfer tokens from escrow account back to owner
       token::transfer(
           CpiContext::new_with_signer(
@@ -105,11 +99,9 @@ pub struct InitializeEscrow<'info> {
 #[instruction(params: InitializeEscrowParams)]
 pub struct WithdrawEscrow<'info> {
     #[account(
-      init_if_needed,
-      payer = owner,
+      mut,
       seeds=[b"escrow", owner.key().as_ref()],
       bump,
-      space = 8 + 8 + 32
     )]
     pub escrow: Account<'info, Escrow>,
 
