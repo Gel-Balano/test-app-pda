@@ -38,7 +38,7 @@ pub mod test_app_pda {
               Transfer {
                   from: ctx.accounts.escrow_token_account.to_account_info(),
                   to: ctx.accounts.owner_token_account.to_account_info(),
-                  authority: ctx.accounts.owner.to_account_info(),
+                  authority: escrow.to_account_info(),
               },
               &[&[b"escrow", escrow.owner.as_ref(), &[escrow.bump]]],
           ),

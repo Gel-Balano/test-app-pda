@@ -103,7 +103,7 @@ describe("test-app-pda", () => {
   it("can withdraw from escrow.", async () => {
     // Add your test here.
     await program.methods.withdrawEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
-      owner: authority.publicKey,
+      owner: escrowPda,
       mint: tokenMint
     }).signers([authority]).rpc()
   })
