@@ -31,9 +31,10 @@ pub mod test_app_pda {
     pub fn withdraw_escrow(ctx: Context<WithdrawEscrow>, params: EscrowParams) -> Result<()> {
       let escrow = &mut ctx.accounts.escrow;
       let escrow_bump = escrow.bump.to_le_bytes();
+      let owner_key = ctx.accounts.owner.key();
       let seeds = vec![
         b"escrow".as_ref(),
-        escrow.owner.as_ref(),
+        owner_key.as_ref(),
         escrow_bump.as_ref(),
       ];
       let signer = vec![seeds.as_slice()];
