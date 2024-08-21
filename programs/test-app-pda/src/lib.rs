@@ -8,7 +8,7 @@ declare_id!("3U1szxp8AY1YCQ98gEGwjzW9ntVUUZNSAV2oKEeZRTNr");
 pub mod test_app_pda {
     use super::*;
 
-    pub fn deposit_escrow(ctx: Context<InitializeEscrow>, params: InitializeEscrowParams) -> Result<()> {
+    pub fn deposit_escrow(ctx: Context<InitializeEscrow>, params: EscrowParams) -> Result<()> {
         let escrow = &mut ctx.accounts.escrow;
         escrow.owner = ctx.accounts.owner.key();
         escrow.bump = ctx.bumps.escrow;
@@ -28,8 +28,15 @@ pub mod test_app_pda {
         Ok(())
     }
 
-    pub fn withdraw_escrow(ctx: Context<WithdrawEscrow>, params: InitializeEscrowParams) -> Result<()> {
+    pub fn withdraw_escrow(ctx: Context<WithdrawEscrow>, params: EscrowParams) -> Result<()> {
       let escrow = &mut ctx.accounts.escrow;
+      let escrow_bump = escrow.bump.to_le_bytes();
+      let seeds = vec![
+        b"escrow".as_ref(),
+        escrow.owner.as_ref(),
+        escrow_bump.as_ref(),
+      ];
+      let signer = vec![seeds.as_slice()];
 
       // Transfer tokens from escrow account back to owner
       token::transfer(
@@ -40,7 +47,7 @@ pub mod test_app_pda {
                   to: ctx.accounts.owner_token_account.to_account_info(),
                   authority: escrow.to_account_info(),
               },
-              &[&[b"escrow", escrow.owner.as_ref(), &[escrow.bump]]],
+              signer.as_slice(),
           ),
           params.amount,
       )?;
@@ -50,12 +57,12 @@ pub mod test_app_pda {
 }
 
 #[derive(AnchorDeserialize, AnchorSerialize)]
-pub struct InitializeEscrowParams {
+pub struct EscrowParams {
     pub amount: u64,
 }
 
 #[derive(Accounts)]
-#[instruction(params: InitializeEscrowParams)]
+#[instruction(params: EscrowParams)]
 pub struct InitializeEscrow<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -93,7 +100,7 @@ pub struct InitializeEscrow<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(params: InitializeEscrowParams)]
+#[instruction(params: EscrowParams)]
 pub struct WithdrawEscrow<'info> {
     #[account(
       mut,
