@@ -103,8 +103,23 @@ describe("test-app-pda", () => {
   it("can withdraw from escrow.", async () => {
     // Add your test here.
     await program.methods.withdrawEscrow({amount: new BN(5 * 10 ** 9)}).accounts({
-      owner: escrowPda,
       mint: tokenMint
-    }).signers([authority]).rpc()
+    }).rpc()
+
+    const tokenAccountInfo = await getAccount(
+      program.provider.connection,
+      associatedTokenAccount
+    )
+
+    const balance = tokenAccountInfo.amount
+    expect(Number(balance) / 10 ** 9).to.be.equal(1000)
+
+    const escrowAccountInfo = await getAccount(
+      program.provider.connection,
+      escrowAccount
+    )
+
+    const escrowBalance = escrowAccountInfo.amount
+    expect(Number(escrowBalance) / 10 ** 9).to.be.equal(0)
   })
 })
