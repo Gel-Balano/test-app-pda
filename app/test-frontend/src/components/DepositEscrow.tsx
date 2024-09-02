@@ -1,10 +1,9 @@
 import { useEffect } from "react"
 // import { useConnection } from "@solana/wallet-adapter-react"
-import { program, escrowPDA } from "../anchor/setup"
+import { getProgram, escrowPDA } from "../anchor/setup"
 
 export default function FetchEscrow() {
-  // const { connection } = useConnection()
-  // const [escrowData, setEscrowData] = useState<any>(null)
+  const program = getProgram()
 
   const handleDeposit = () => {
     // Deposit the amount into the escrow account

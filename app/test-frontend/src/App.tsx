@@ -14,7 +14,6 @@ import "./App.css"
 // Default styles that can be overridden by your app
 import "@solana/wallet-adapter-react-ui/styles.css"
 import FetchEscrow from "./components/FetchEscrow"
-import React from "react"
 
 function App() {
   // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.

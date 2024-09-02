@@ -1,26 +1,30 @@
-import { AnchorProvider, Idl, Program } from "@coral-xyz/anchor"
+import { AnchorProvider, Program } from "@coral-xyz/anchor"
 import TestAppPdaIdl from "./idl/test_app_pda.json"
+import { TestAppPda } from "./idl/type"
 import { PublicKey } from "@solana/web3.js"
 import { AnchorWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react"
+import { Buffer } from "buffer"
 
-const testAppPda = TestAppPdaIdl as Idl
+export const testAppPda = TestAppPdaIdl as TestAppPda
 export const PROGRAM_ID = new PublicKey(testAppPda.address)
 console.log("program id", PROGRAM_ID.toBase58())
 
-const { connection } = useConnection()
-console.log("connection", connection)
+export const getProgram = () => {
+  console.log("getProgram started")
+  const wallet = useAnchorWallet()
+  console.log("wallet", wallet)
 
-const wallet = useAnchorWallet()
-console.log("wallet", wallet)
+  const { connection } = useConnection()
+  console.log("connection", connection)
 
-const provider = new AnchorProvider(connection, wallet as AnchorWallet, {})
-console.log("Provider", provider)
+  const provider = new AnchorProvider(connection, wallet as AnchorWallet, {})
+  console.log("provider", provider)
 
-export const program = new Program(testAppPda, provider)
+  return new Program(testAppPda, provider)
+}
 
-console.log("program", program)
 export const [escrowPDA] = PublicKey.findProgramAddressSync(
   [Buffer.from("escrow")],
-  program.programId,
+  new PublicKey("BdVwc1n1Ux2afUrcz189iwSmVmWgGtPCxuoGG3EDiw7S"),
 )
-console.log("pda", escrowPDA)
+console.log("escrow pda", escrowPDA.toBase58())

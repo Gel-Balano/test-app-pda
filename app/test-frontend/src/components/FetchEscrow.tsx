@@ -1,21 +1,37 @@
 import { useEffect, useState } from "react"
-// import { useConnection } from "@solana/wallet-adapter-react"
-import { program, escrowPDA } from "../anchor/setup"
+import { testAppPda, escrowPDA, getProgram } from "../anchor/setup"
+import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token"
+import { PublicKey } from "@solana/web3.js"
+import { AnchorWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react"
+import { AnchorProvider, Program } from "@coral-xyz/anchor"
 
 export default function FetchEscrow() {
-  // const { connection } = useConnection()
   const [escrowData, setEscrowData] = useState<any>(null)
 
-  useEffect(() => {
-    console.log("fetching escrow data", escrowPDA)
-    // Fetch escrow balance
-    program.account.escrow.fetch(escrowPDA).then(data => {
-      console.log("wat", data)
-      setEscrowData(data)
-    })
+  const getEscowAccount = async () => {
+    const program = getProgram()
+    // const escrowAta = await getAssociatedTokenAddress(
+    //   new PublicKey("C1Q4tc5mAMxgSdtrHiva6tNWdw9iCgUpd2GhT8BF3QGz"), // USDC token
+    //   escrowPDA,
+    //   true
+    // )
 
-    // to-do get the balance from escrow
-  }, [program])
+    // return await getAccount(
+    //   program.provider.connection,
+    //   escrowAta
+    // )
+  }
+
+  useEffect(() => {
+    // Fetch escrow balance
+    const data = getEscowAccount()
+    console.log("fetching escrow account", data)
+    setEscrowData(data)
+  }, [])
+
+  useEffect(() => {
+    console.log("wat escrow", escrowData)
+  }, [escrowData])
 
   // Render the deposited amount
   return <p className="text-lg">Amount Escrowed: {escrowData?.amount?.toString()}</p>
