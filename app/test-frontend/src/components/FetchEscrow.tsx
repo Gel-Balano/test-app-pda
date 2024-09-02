@@ -7,6 +7,7 @@ export default function FetchEscrow() {
   const [escrowData, setEscrowData] = useState<any>(null)
 
   useEffect(() => {
+    console.log("fetching escrow data", escrowPDA)
     // Fetch escrow balance
     program.account.escrow.fetch(escrowPDA).then(data => {
       console.log("wat", data)

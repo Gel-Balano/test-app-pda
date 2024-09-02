@@ -36,7 +36,7 @@ function App() {
         <WalletModalProvider>
           <WalletMultiButton />
           <h1>Hello Solana</h1>
-          {/* <FetchEscrow /> */}
+          <FetchEscrow />
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
