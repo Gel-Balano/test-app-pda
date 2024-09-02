@@ -12,7 +12,9 @@ export default function FetchEscrow() {
   }
 
   useEffect(() => {
-    const escrow = program.account.escrow.fetch(escrowPDA)
+    const escrow = program.account.escrow.fetch(escrowPDA).then(data => {
+      console.log("wat", data)
+    })
   }, [program])
 
   // Render the deposited amount

@@ -8,11 +8,13 @@ export default function FetchEscrow() {
 
   useEffect(() => {
     // Fetch escrow balance
-    const escrow = program.account.escrow.fetch(escrowPDA)
+    const escrow = program.account.escrow.fetch(escrowPDA).then(data => {
+      console.log("wat", data)
+    })
 
     // to-do get the balance from escrow
   }, [program])
 
   // Render the deposited amount
-  return <p className="text-lg">Count: {escrowData?.count?.toString()}</p>
+  return <p className="text-lg">Amount Escrowed: {escrowData?.amount?.toString()}</p>
 }
