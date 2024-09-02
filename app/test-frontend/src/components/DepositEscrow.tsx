@@ -6,13 +6,19 @@ export default function FetchEscrow() {
   const { connection } = useConnection()
   const [escrowData, setEscrowData] = useState<any>(null)
 
-  useEffect(() => {
-    // Fetch escrow balance
-    const escrow = program.account.escrow.fetch(escrowPDA)
+  const handleDeposit = () => {
+    // Deposit the amount into the escrow account
+    // Update the escrowData state with the new balance
+  }
 
-    // to-do get the balance from escrow
+  useEffect(() => {
+    const escrow = program.account.escrow.fetch(escrowPDA)
   }, [program])
 
   // Render the deposited amount
-  return <p className="text-lg">Count: {escrowData?.count?.toString()}</p>
+  return <form action="#!">
+    <label>Enter Amount</label>
+    <input type="number" />
+    <button type="submit">Deposit</button>
+  </form>
 }
